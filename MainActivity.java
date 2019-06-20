@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private ListView lista;
     private ImageView avatar;
     private ArrayList<UserModel> users;
-    private CustomAdapter adapter;
+    public CustomAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,27 +36,25 @@ public class MainActivity extends AppCompatActivity {
 
         fetchData fc = new fetchData();
 
-        fc.execute();
+        fc.execute("https://reqres.in/api/users?per_page=12");
 
         adapter = new CustomAdapter(MainActivity.this, new ArrayList<UserModel>());
 
         lista = findViewById(R.id.lista);
         avatar = findViewById(R.id.avatar);
 
-        //adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         lista.setAdapter(adapter);
 
         lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object itemid = lista.getItemAtPosition(position);
                 UserModel user = (UserModel) adapter.getItem(position);
                 if(user != null) {
                     Intent i = new Intent(MainActivity.this, UserDetails.class);
                     i.putExtra("Emri", user.getFirstName());
                     i.putExtra("Mbiemri", user.getLastName());
                     i.putExtra("Email", user.getEmail());
-                    i.putExtra("Id", Integer.toString(user.getId()));
+                    i.putExtra("Id", user.getId());
                     i.putExtra("Avatar", user.getAvatar());
                     startActivity(i);
                 }
@@ -64,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    class fetchData extends AsyncTask<Void, Void, ArrayList<UserModel>> {
+    class fetchData extends AsyncTask<String, Void, ArrayList<UserModel>> {
 
         private ArrayList<UserModel> userModels = new ArrayList<>();
 
@@ -74,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected ArrayList<UserModel> doInBackground(Void... params) {
+        protected ArrayList<UserModel> doInBackground(String... params) {
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
@@ -117,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                     contactModel.setAvatar(finalObject.getString("avatar"));
                     userModels.add(contactModel);
                 }
+                return userModels;
 
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
