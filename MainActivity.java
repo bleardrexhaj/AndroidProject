@@ -1,11 +1,10 @@
 package com.br.projekt.internshipproject;
 
 import android.os.AsyncTask;
-import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import org.json.JSONArray;
@@ -21,25 +20,33 @@ import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    ListView lista;
-    //TextView txt;
-    ArrayAdapter<String> adapter;
+    private ListView lista;
+    private ImageView avatar;
+    private ArrayList<UserModel> users;
+    private CustomAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        lista = findViewById(R.id.lista);
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice);
-        lista.setAdapter(adapter);
 
         fetchData fc = new fetchData();
+
         fc.execute();
 
+        adapter = new CustomAdapter(MainActivity.this, new ArrayList<UserModel>());
+
+        lista = findViewById(R.id.lista);
+        avatar = findViewById(R.id.avatar);
+
+        //adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
+        lista.setAdapter(adapter);
     }
 
-    class fetchData extends AsyncTask<Void, Void, ArrayList> {
+    class fetchData extends AsyncTask<Void, Void, ArrayList<UserModel>> {
+
+        private ArrayList<UserModel> userModels = new ArrayList<>();
 
         @Override
         protected void onPreExecute() {
@@ -47,20 +54,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected ArrayList doInBackground(Void... params) {
+        protected ArrayList<UserModel> doInBackground(Void... params) {
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             // Will contain the raw JSON response as a string.
             String forecastJsonStr = null;
 
-            ArrayList<UserModel> userModels = new ArrayList<>();
+
             try {
                 URL url = new URL("https://reqres.in/api/users?per_page=12");
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
-                int lengthOfFile = urlConnection.getContentLength();
                 // Read the input stream into a String
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer buffer = new StringBuffer();
@@ -90,11 +96,11 @@ public class MainActivity extends AppCompatActivity {
                     contactModel.setAvatar(finalObject.getString("avatar"));
                     userModels.add(contactModel);
                 }
+                users = userModels;
 
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
             } catch (JSONException e) {
-                System.out.println("test "+userModels);
                 e.printStackTrace();
             } finally {
                 if (urlConnection != null) {
@@ -111,11 +117,11 @@ public class MainActivity extends AppCompatActivity {
             return userModels;
         }
 
-
         @Override
-        protected void onPostExecute(ArrayList result) {
+        protected void onPostExecute(ArrayList<UserModel> result) {
             super.onPostExecute(result);
-            adapter.addAll(result);
+            adapter.updateUsers(result);
+            adapter.notifyDataSetChanged();
         }
     }
 }
