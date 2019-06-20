@@ -1,9 +1,12 @@
 package com.br.projekt.internshipproject;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
@@ -42,6 +45,23 @@ public class MainActivity extends AppCompatActivity {
 
         //adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1);
         lista.setAdapter(adapter);
+
+        lista.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Object itemid = lista.getItemAtPosition(position);
+                UserModel user = (UserModel) adapter.getItem(position);
+                if(user != null) {
+                    Intent i = new Intent(MainActivity.this, UserDetails.class);
+                    i.putExtra("Emri", user.getFirstName());
+                    i.putExtra("Mbiemri", user.getLastName());
+                    i.putExtra("Email", user.getEmail());
+                    i.putExtra("Id", Integer.toString(user.getId()));
+                    i.putExtra("Avatar", user.getAvatar());
+                    startActivity(i);
+                }
+            }
+        });
     }
 
     class fetchData extends AsyncTask<Void, Void, ArrayList<UserModel>> {
@@ -93,10 +113,10 @@ public class MainActivity extends AppCompatActivity {
                     contactModel.setId(finalObject.getInt("id"));
                     contactModel.setFirstName(finalObject.getString("first_name"));
                     contactModel.setLastName(finalObject.getString("last_name"));
+                    contactModel.setEmail(finalObject.getString("email"));
                     contactModel.setAvatar(finalObject.getString("avatar"));
                     userModels.add(contactModel);
                 }
-                users = userModels;
 
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
