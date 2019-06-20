@@ -51,8 +51,7 @@ public class UserDetails extends AppCompatActivity {
         firstName.setText(getIntent().getStringExtra("Emri"));
         lastName.setText(getIntent().getStringExtra("Mbiemri"));
         email.setText(getIntent().getStringExtra("Email"));
-
-        id.setText(getIntent().getStringExtra("Id"));
+        id.setText(getIntent().getIntExtra("Id",-1));
 
         Picasso.get().load(getIntent().getStringExtra("Avatar")).into(userAvatar);
 
